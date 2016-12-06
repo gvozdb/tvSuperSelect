@@ -4,9 +4,8 @@
     // <![CDATA[
     {literal}
     Ext.onReady(function () {
-        var _defaultItems = {/literal}{if $tv->value}{$tv->value}{else}[]{/if}{literal},
-                defaultItems = [],
-                tvssInputSelect;
+        var _defaultItems = {/literal}{if $tv->value}{$tv->value}{else}[]{/if}{literal};
+        var defaultItems = [];
 
         if (Ext.isArray(_defaultItems)) {
             Ext.each(_defaultItems, function (item) {
@@ -25,14 +24,13 @@
             defaultItems: defaultItems,
             {literal}
         });
-
         {/literal}
+
         fld{$tv->id}.setWidth('auto');
         fld{$tv->id}.positionEl.setWidth('auto');
 
-        tvssInputSelect = fld{$tv->id}.inputEl.select('input[type=text]');
-        if (true
-                && typeof tvssInputSelect != 'undefined'
+        var tvssInputSelect = fld{$tv->id}.inputEl.select('input[type=text]');
+        if (typeof(tvssInputSelect) != 'undefined'
                 && Ext.isArray(tvssInputSelect.elements)
                 && tvssInputSelect.elements.length > 0
         ) {

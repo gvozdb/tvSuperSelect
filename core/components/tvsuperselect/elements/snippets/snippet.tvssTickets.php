@@ -1,19 +1,17 @@
 <?php
+/* @var modX $modx */
 
-$scriptProperties['context'] = $context ?: $modx->context->key;
-if (!$tags = $scriptProperties['tag'] ?: $scriptProperties['tags'] ?: $_REQUEST['tag'] ?: $_REQUEST['tags'] ?: '') {
+$sp = &$scriptProperties;
+
+$sp['context'] = $context ?: $modx->context->key;
+if (!$tags = (((($sp['tag'] ?: $sp['tags']) ?: $_REQUEST['tag']) ?: $_REQUEST['tags']) ?: '')) {
     return false;
 }
-if (!$tvs = $scriptProperties['tv'] ?: $scriptProperties['tvs'] ?: '') {
+if (!$tvs = (($sp['tv'] ?: $sp['tvs']) ?: '')) {
     return false;
 }
-if (!$tvs = $scriptProperties['tv'] ?: $scriptProperties['tvs'] ?: '') {
-    return false;
-}
-$snippet = $scriptProperties['snippet'] ?: 'getTickets';
-foreach (array('tag', 'tags', 'tv', 'tvs', 'snippet') as $v) {
-    unset($scriptProperties[$v]);
-}
+$snippet = $sp['snippet'] ?: 'getTickets';
+unset($sp['tag'], $sp['tags'], $sp['tv'], $sp['tvs'], $sp['snippet']);
 
 // Преобразуем список тегов в массив
 if (is_string($tags)) {
@@ -34,24 +32,24 @@ if (empty($tags)) {
 $tvs = explode(',', $tvs);
 
 // Как делаем выборку, через LIKE или =
-$like = isset($scriptProperties['like']) ? $scriptProperties['like'] : false;
+$like = isset($sp['like']) ? $sp['like'] : false;
 
 // Подготавливаем параметры для выборки ресурсов с нужными тегами
 $class = 'Ticket';
-$loadModels = array('tvsuperselect' => MODX_CORE_PATH.'components/tvsuperselect/model/');
+$loadModels = array('tvsuperselect' => MODX_CORE_PATH . 'components/tvsuperselect/model/');
 $select = array();
 $leftJoin = array();
 $where = array(array());
 
 foreach ($tvs as $tv) {
-    $alias = 'tvss'.$tv;
+    $alias = 'tvss' . $tv;
     $orConditions = array();
 
     foreach ($tags as $i => $tag) {
         if ($like) {
-            $orConditions[] = $alias.'.value LIKE "%'.addslashes($tag).'%"';
+            $orConditions[] = $alias . '.value LIKE "%' . addslashes($tag) . '%"';
         } else {
-            $orConditions[] = $alias.'.value = "'.addslashes($tag).'"';
+            $orConditions[] = $alias . '.value = "' . addslashes($tag) . '"';
         }
     }
 
@@ -60,45 +58,43 @@ foreach ($tvs as $tv) {
             $alias => array(
                 'class' => 'tvssOption',
                 'alias' => $alias,
-                'on' => $alias.'.resource_id = '.$class.'.id AND ('.implode(' OR ', $orConditions).')',
+                'on' => $alias . '.resource_id = ' . $class . '.id AND (' . implode(' OR ', $orConditions) . ')',
             ),
         );
         $where[0][] = array(
-            'OR:'.$alias.'.tv_id:=' => $tv,
+            'OR:' . $alias . '.tv_id:=' => $tv,
         );
     }
 }
 
 // Приведение параметра loadModels к нужному нам виду (JSON)
-if (!empty($scriptProperties['loadModels']) && !$modx->fromJSON($scriptProperties['loadModels'])) {
-    $tmp_array = array_map('trim', explode(',', $scriptProperties['loadModels']));
+if (!empty($sp['loadModels']) && !$modx->fromJSON($sp['loadModels'])) {
+    $tmp_array = array_map('trim', explode(',', $sp['loadModels']));
     foreach ($tmp_array as $v) {
-        $tmp[$v] = MODX_CORE_PATH.'components/'.strtolower($v).'/model/';
+        $tmp[$v] = MODX_CORE_PATH . 'components/' . strtolower($v) . '/model/';
     }
-    $scriptProperties['loadModels'] = $modx->toJSON($tmp);
+    $sp['loadModels'] = $modx->toJSON($tmp);
 }
 
 // Обработка параметров указанных юзером, пересекающихся с параметрами сниппета
 foreach (array('loadModels', 'where', 'select', 'leftJoin') as $v) {
-    if (!empty($scriptProperties[$v])) {
-        $tmp = $modx->fromJSON($scriptProperties[$v]);
+    if (!empty($sp[$v])) {
+        $tmp = $modx->fromJSON($sp[$v]);
         if (is_array($tmp)) {
             $$v = array_merge($$v, $tmp);
         }
     }
-    unset($scriptProperties[$v]);
+    unset($sp[$v]);
 }
 
 // Сливаем подготоваленные параметры с указанными юзером и запускаем
 $output = $modx->runSnippet($snippet, array_merge(array(
-        'class' => $class,
-        'loadModels' => $modx->toJSON($loadModels),
-        'select' => $modx->toJSON($select),
-        'leftJoin' => $modx->toJSON($leftJoin),
-        'where' => $modx->toJSON($where),
-        'groupby' => $class.'.id',
-    ),
-    $scriptProperties
-));
+    'class' => $class,
+    'loadModels' => $modx->toJSON($loadModels),
+    'select' => $modx->toJSON($select),
+    'leftJoin' => $modx->toJSON($leftJoin),
+    'where' => $modx->toJSON($where),
+    'groupby' => $class . '.id',
+), $sp));
 
 return $output;

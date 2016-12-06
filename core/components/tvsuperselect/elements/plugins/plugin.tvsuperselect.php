@@ -1,146 +1,116 @@
 <?php
+/** @var modX $modx */
+/** @var tvSuperSelect $tvss */
+/** @var modTemplateVarResource $obj */
 
-$tvss = $modx->getService('tvsuperselect', 'tvsuperselect', $modx->getOption('core_path').'components/tvsuperselect/model/tvsuperselect/');
-if (!($tvss instanceof tvSuperSelect)) {
+if (!$tvss = $modx->getService('tvsuperselect', 'tvsuperselect', MODX_CORE_PATH .
+                                                                 'components/tvsuperselect/model/tvsuperselect/')
+) {
     return '';
 }
 
 switch ($modx->event->name) {
     case 'OnTVInputRenderList':
-        $modx->event->output($tvss->config['corePath'].'tv/input/');
-    break;
-
+        $modx->event->output($tvss->config['corePath'] . 'tv/input/');
+        break;
     case 'OnTVOutputRenderList':
-        $modx->event->output($tvss->config['corePath'].'tv/output/');
-    break;
-
+        $modx->event->output($tvss->config['corePath'] . 'tv/output/');
+        break;
     case 'OnTVInputPropertiesList':
-        $modx->event->output($tvss->config['corePath'].'tv/inputproperties/');
-    break;
-
+        $modx->event->output($tvss->config['corePath'] . 'tv/inputproperties/');
+        break;
     case 'OnTVOutputRenderPropertiesList':
-        $modx->event->output($tvss->config['corePath'].'tv/properties/');
-    break;
-
+        $modx->event->output($tvss->config['corePath'] . 'tv/properties/');
+        break;
     case 'OnManagerPageBeforeRender':
-        $modx23 = !empty($modx->version) && version_compare($modx->version['full_version'], '2.3.0', '>=');
-        $modx->controller->addHtml('<script type="text/javascript">
-            Ext.onReady(function() {
-                MODx.modx23 = '.(int) $modx23.';
-            });
-        </script>');
-        if (!$modx23) {
-            $modx->controller->addCss($tvss->config['cssUrl'].'mgr/bootstrap.min.css');
-        }
-        $modx->controller->addCss($tvss->config['cssUrl'].'mgr/main.css');
-    break;
+        $modx->controller->addCss($tvss->config['cssUrl'] . 'mgr/main.css');
+        break;
 
     case 'OnDocFormRender':
-        $modx->regClientCSS($tvss->config['cssUrl'].'mgr/main.css');
-
-        $modx->regClientStartupScript('
-            <script type="text/javascript">
-                if(typeof jQuery == "undefined")
-                {
-                    document.write(\'<script type="text/javascript" src="'.$tvss->config['jsUrl'].'jquery-2.1.1.min.js" ></\'+\'script>\');
-                }
-            </script>
-        ', true);
-
-        $modx->regClientStartupScript($tvss->config['jsUrl'].'mgr/tvsuperselect.js');
-        $modx->regClientStartupScript('
-            <script type="text/javascript">
-                tvSuperSelect.config = '.$modx->toJSON($tvss->config).';
-                tvSuperSelect.config.connector_url = "'.$tvss->config['connectorUrl'].'";
-            </script>
-        ', true);
-
-        $modx->regClientStartupScript($tvss->config['jsUrl'].'mgr/misc/ms2.combo.js');
-    break;
+        $modx->regClientCSS($tvss->config['cssUrl'] . 'mgr/main.css');
+        $modx->regClientStartupScript('<script type="text/javascript">
+            if (typeof(jQuery) == "undefined") {
+                document.write(\'<script type="text/javascript" src="' . $tvss->config['jsUrl'] . 'jquery-2.1.1.min.js" ></\'+\'script>\');
+            }
+        </script>', true);
+        $modx->regClientStartupScript($tvss->config['jsUrl'] . 'mgr/tvsuperselect.js');
+        $modx->regClientStartupScript('<script type="text/javascript">
+            tvSuperSelect.config = ' . $modx->toJSON($tvss->config) . ';
+            tvSuperSelect.config.connector_url = "' . $tvss->config['connectorUrl'] . '";
+        </script>', true);
+        $modx->regClientStartupScript($tvss->config['jsUrl'] . 'mgr/misc/ms2.combo.js');
+        break;
 
     case 'OnDocFormSave':
         if (is_object($resource) && is_array($resource->_fields)) {
-            $data = $resource->_fields;
-            $resource_id = $data['id'];
-            // $modx->log(1, print_r($data, 1));
+            $fields = $resource->_fields;
+            $id = $fields['id'];
 
-            $flds = $tv_values = array();
-            foreach ($data as $key => $value) {
-                if (strstr($key, 'tvss-option-')) {
-                    $tv_id = str_replace('tvss-option-', '', $key);
+            // Если это товар miniShop2 и ТВ поля в объекте записаны в msProductData
+            if ($fields['class_key'] === 'msProduct' && !array_key_exists('tvs', $fields)) {
+                $fields = $resource->Data->_fields;
+            }
 
-                    $array = array_diff($value, array(''));
-                    if (!empty($array)) {
-                        $flds[] = array(
-                            'resource_id' => $resource_id,
-                            'tv_id' => $tv_id,
-                            'data' => $array,
-                        );
-
-                        $tv_values[$tv_id] = $modx->toJSON($array);
-                    } else {
-                        $flds[] = array(
-                            'resource_id' => $resource_id,
-                            'tv_id' => $tv_id,
-                            'data' => array(),
-                        );
-                    }
+            //
+            $data = array();
+            foreach ($fields as $k => $v) {
+                if (preg_match('/^tvss\-option\-/ui', $k)) {
+                    $tv = str_replace('tvss-option-', '', $k);
+                    $data[$tv] = array_diff(array_map('trim', $v), array(''));
+                    unset($tv);
                 }
             }
 
-            // пишем в таблицу пакета
-            if (!empty($flds)) {
-                // $modx->log(1, 'if (!empty($flds)) { '.print_r($flds, 1));
-
+            //
+            if (!empty($data)) {
                 $table = $modx->getTableName('tvssOption');
-
-                foreach ($flds as $fld) {
-                    $sql = 'DELETE FROM '.$table.' WHERE `resource_id` = '.$fld['resource_id'].' AND `tv_id` = '.$fld['tv_id'];
+                foreach ($data as $tv => $values) {
+                    /**
+                     * Пишем в таблицу пакета
+                     */
+                    // Удаляем старые записи
+                    $sql = "DELETE FROM {$table} WHERE `resource_id` =? AND `tv_id` =?";
                     $stmt = $modx->prepare($sql);
-                    $stmt->execute();
-                    $stmt->closeCursor();
+                    if (!$stmt->execute(array($id, $tv))) {
+                        $modx->log(1, '[tvSuperSelect] ' . print_r($stmt->errorInfo, true) . ' SQL: ' . $sql);
+                    }
 
-                    $values = array();
-                    if ($fld['data']) {
-                        foreach ($fld['data'] as $value) {
-                            if (!empty($value)) {
-                                $values[] = '('.$fld['resource_id'].',"'.$fld['tv_id'].'","'.addslashes($value).'")';
-                            }
+                    // Добавляем новые записи
+                    if (!empty($values)) {
+                        // Подготавливаем параметры для запроса
+                        $tmp = array();
+                        $params = array('id' => $id, 'tv' => $tv);
+                        foreach ($values as $k => $v) {
+                            $tmp[] = "(:id, :tv, :value{$k})";
+                            $params['value' . $k] = $v;
                         }
-                    }
 
-                    if ($values) {
-                        $sql = 'INSERT INTO '.$table.' (`resource_id`,`tv_id`,`value`) VALUES '.implode(',', $values);
+                        // Совершаем запрос на добавление записей
+                        $sql = "INSERT INTO {$table} (`resource_id`, `tv_id`, `value`) VALUES " . implode(', ', $tmp);
                         $stmt = $modx->prepare($sql);
-                        $stmt->execute();
-                        $stmt->closeCursor();
-                    }
-                }
-            }
-
-            // пишем в таблицу modTemplateVarResource
-            if (!empty($tv_values)) {
-                // $modx->log(1, 'if (!empty($tv_values)) { '.print_r($tv_values, 1));
-
-                foreach ($tv_values as $tv_id => $values) {
-                    if (!$tv_obj = $modx->getObject('modTemplateVarResource', array(
-                        'tmplvarid' => $tv_id,
-                        'contentid' => $resource_id,
-                    ))) {
-                        $tv_obj = $modx->newObject('modTemplateVarResource');
+                        if (!$stmt->execute($params)) {
+                            $modx->log(1, '[tvSuperSelect] ' . print_r($stmt->errorInfo, true) . ' SQL: ' . $sql);
+                        }
+                        unset($tmp);
                     }
 
-                    $tv_obj->fromArray(array(
-                        'tmplvarid' => $tv_id,
-                        'contentid' => $resource_id,
-                        'value' => $values,
-                    ));
-                    $tv_obj->save();
-                    // $modx->log(1, print_r($tv_obj->toArray(), 1));
-
-                    unset($tv_obj);
+                    /**
+                     * Пишем в таблицу modTemplateVarResource
+                     */
+                    $condition = array(
+                        'tmplvarid' => $tv,
+                        'contentid' => $id,
+                    );
+                    if (!$obj = $modx->getObject('modTemplateVarResource', $condition)) {
+                        $obj = $modx->newObject('modTemplateVarResource');
+                    }
+                    $obj->fromArray(array_merge($condition, array(
+                        'value' => $modx->toJSON($values),
+                    )));
+                    $obj->save();
+                    unset($condition, $obj);
                 }
             }
         }
-    break;
+        break;
 }

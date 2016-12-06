@@ -1,28 +1,30 @@
 <?php
-
+/* @var modX $modx */
 /* @var pdoFetch $pdoFetch */
+
+$sp = &$scriptProperties;
+
 $fqn = $modx->getOption('pdoFetch.class', null, 'pdotools.pdofetch', true);
-$path = $modx->getOption('pdotools_class_path', null, MODX_CORE_PATH.'components/pdotools/model/', true);
+$path = $modx->getOption('pdotools_class_path', null, MODX_CORE_PATH . 'components/pdotools/model/', true);
 if ($pdoClass = $modx->loadClass($fqn, $path, false, true)) {
-    $pdoFetch = new $pdoClass($modx, $scriptProperties);
+    $pdoFetch = new $pdoClass($modx, $sp);
+    $pdoFetch->addTime('pdoTools loaded');
 } else {
     return false;
 }
-$pdoFetch->addTime('pdoTools loaded');
-
-if (!$modx->addPackage('tvsuperselect', MODX_CORE_PATH.'components/tvsuperselect/model/')) {
+if (!$modx->addPackage('tvsuperselect', MODX_CORE_PATH . 'components/tvsuperselect/model/')) {
     return false;
 }
 
 // Получаем параметры
-$id = $scriptProperties['id'] ?: 0;
-$tv = $scriptProperties['tv'] ?: 0;
-$pageId = $scriptProperties['pageId'] ?: 0;
-$tpl = $scriptProperties['tpl'] ?: '@INLINE <a href="[[+link]]">[[+tag]]</a>';
-$tplWrapper = $scriptProperties['tplWrapper'] ?: '@INLINE [[+output]]';
-$outputSeparator = isset($scriptProperties['outputSeparator']) ? $scriptProperties['outputSeparator'] : ', ';
-$toPlaceholder = $scriptProperties['toPlaceholder'] ?: false;
-$scheme = $scriptProperties['scheme'] ?: '-1';
+$id = $sp['id'] ?: 0;
+$tv = $sp['tv'] ?: 0;
+$pageId = $sp['pageId'] ?: 0;
+$tpl = $sp['tpl'] ?: '@INLINE <a href="[[+link]]">[[+tag]]</a>';
+$tplWrapper = $sp['tplWrapper'] ?: '@INLINE [[+output]]';
+$outputSeparator = isset($sp['outputSeparator']) ? $sp['outputSeparator'] : ', ';
+$toPlaceholder = $sp['toPlaceholder'] ?: false;
+$scheme = $sp['scheme'] ?: '-1';
 if (!$id || !$tv || !$tpl) {
     return false;
 }
@@ -31,19 +33,16 @@ if (!$id || !$tv || !$tpl) {
 $q = $modx->newQuery('tvssOption', array(
     'resource_id' => $id,
     'tv_id' => $tv,
-));
-$q->select('value as tag');
+))->select('value as tag');
 // $q->prepare(); print_r($q->toSQL());
 
 $output = '';
 $items = array();
-if ($q->prepare() && $q->stmt->execute()) {
+if ($q->prepare()->execute()) {
     if ($rows = $q->stmt->fetchAll(PDO::FETCH_ASSOC)) {
         foreach ($rows as $row) {
             $row['tagLink'] = urlencode($row['tag']);
-            $row['link'] = $pageId
-            ? $modx->makeUrl($pageId, '', array('tag' => $row['tagLink']), $scheme)
-            : '';
+            $row['link'] = $pageId ? $modx->makeUrl($pageId, '', array('tag' => $row['tagLink']), $scheme) : '';
 
             $items[] = $pdoFetch->getChunk($tpl, $row);
         }
