@@ -25,15 +25,34 @@ $tplWrapper = $sp['tplWrapper'] ?: '@INLINE [[+output]]';
 $outputSeparator = isset($sp['outputSeparator']) ? $sp['outputSeparator'] : ', ';
 $toPlaceholder = $sp['toPlaceholder'] ?: false;
 $scheme = $sp['scheme'] ?: '-1';
-if (!$id || !$tv || !$tpl) {
+$count = $sp['count'] ?: 0;
+$sortby = $sp['sortby'] ?: 'tag';
+$sortdir = $sp['sortdir'] ?: 'DESC';
+$limit = $sp['limit'] ?: 10;
+
+if (!$tv || !$tpl) {
     return false;
 }
 
-// Выборка тегов
-$q = $modx->newQuery('tvssOption', array(
-    'resource_id' => $id,
+$qp = array(
     'tv_id' => $tv,
-))->select('value as tag');
+);
+
+if ($id) {
+    $qp['resource_id'] = $id;
+}
+
+// Выборка тегов
+$q = $modx->newQuery('tvssOption', $qp);
+if ($count) {
+    $qsel = 'value as tag, COUNT(value) as count';
+    $q->groupby('tag');
+} else {
+    $qsel = 'value as tag';
+}
+$q->select($qsel);
+$q->sortby($sortby, $sortdir);
+$q->limit($limit);
 // $q->prepare(); print_r($q->toSQL());
 
 $output = '';
