@@ -3,9 +3,8 @@
 /** @var tvSuperSelect $tvss */
 /** @var modTemplateVarResource $obj */
 
-if (!$tvss = $modx->getService('tvsuperselect', 'tvsuperselect', MODX_CORE_PATH .
-                                                                 'components/tvsuperselect/model/tvsuperselect/')
-) {
+$path = MODX_CORE_PATH . 'components/tvsuperselect/model/tvsuperselect/';
+if (!$tvss = $modx->getService('tvsuperselect', 'tvSuperSelect', $path)) {
     return '';
 }
 
@@ -14,13 +13,13 @@ switch ($modx->event->name) {
         $modx->event->output($tvss->config['corePath'] . 'tv/input/');
         break;
     case 'OnTVOutputRenderList':
-        $modx->event->output($tvss->config['corePath'] . 'tv/output/');
+        // $modx->event->output($tvss->config['corePath'] . 'tv/output/');
         break;
     case 'OnTVInputPropertiesList':
         $modx->event->output($tvss->config['corePath'] . 'tv/inputproperties/');
         break;
     case 'OnTVOutputRenderPropertiesList':
-        $modx->event->output($tvss->config['corePath'] . 'tv/properties/');
+        // $modx->event->output($tvss->config['corePath'] . 'tv/properties/');
         break;
     case 'OnManagerPageBeforeRender':
         $modx->controller->addCss($tvss->config['cssUrl'] . 'mgr/main.css');
