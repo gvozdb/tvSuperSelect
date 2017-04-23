@@ -1,14 +1,20 @@
 <?php
+// @formatter:off
+
+/* @var modX $modx */
 /* @var pdoFetch $pdoFetch */
+
+$sp = &$scriptProperties;
+
 if (!$modx->loadClass('pdofetch', MODX_CORE_PATH . 'components/pdotools/model/pdotools/', false, true)) {return false;}
-$pdoFetch = new pdoFetch($modx, $scriptProperties);
+$pdoFetch = new pdoFetch($modx, $sp);
 
 $config = array(
     'parents' => null,  // current resource default
     'depth' => 1,
     'requestVar' => 'tag',
-    'targetID' => null,
-    'tvID' => null,
+    // 'targetID' => null,
+    'tv' => null,
     'sortby' => 'count', // count || tag
     'sortorder' => 'DESC', // DESC || ASC
     'limit' => 0,
@@ -19,7 +25,7 @@ $config = array(
     'tplAllActive' => '@INLINE <li>{$_modx->lexicon("all")}</li>',
     'tplWrapper' => '@INLINE <ul>{$output}</ul>',
 );
-$config = array_merge($config, $scriptProperties);
+$config = array_merge($config, $sp);
 
 $parents = empty($config['parents']) ? array($modx->resource->id) : explode(',', $config['parents']);
 if ($config['depth'] != 1) {
@@ -46,8 +52,8 @@ $where = array(
     'mr.deleted' => 0,
     'mr.parent:IN' => $parents,
 );
-if (!empty($config['tvID'])) {
-    $where['tv_id'] = $config['tvID'];
+if (!empty($config['tv'])) {
+    $where['tv_id'] = $config['tv'];
 }
 $c->where($where);
 $c->select('COUNT(*) AS `count`, `tvssOption`.`value` AS `tag`');
