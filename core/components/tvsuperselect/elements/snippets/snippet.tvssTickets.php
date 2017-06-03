@@ -35,7 +35,7 @@ $tvs = explode(',', $tvs);
 $like = isset($sp['like']) ? $sp['like'] : false;
 
 // Подготавливаем параметры для выборки ресурсов с нужными тегами
-$class = 'Ticket';
+$class = $sp['class'] ?: 'Ticket';
 $loadModels = array('tvsuperselect' => MODX_CORE_PATH . 'components/tvsuperselect/model/');
 $select = array();
 $leftJoin = array();
@@ -79,10 +79,11 @@ if (!empty($sp['loadModels']) && !$modx->fromJSON($sp['loadModels'])) {
 // Обработка параметров указанных юзером, пересекающихся с параметрами сниппета
 foreach (array('loadModels', 'where', 'select', 'leftJoin') as $v) {
     if (!empty($sp[$v])) {
-        $tmp = $modx->fromJSON($sp[$v]);
+        $tmp = !is_array($sp[$v]) ? $modx->fromJSON($sp[$v]) : $sp[$v];
         if (is_array($tmp)) {
             $$v = array_merge($$v, $tmp);
         }
+        unset($tmp);
     }
     unset($sp[$v]);
 }

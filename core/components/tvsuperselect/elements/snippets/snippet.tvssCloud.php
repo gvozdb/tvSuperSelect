@@ -11,7 +11,7 @@ $pdoFetch = new pdoFetch($modx, $sp);
 
 $config = array(
     'parents' => null,  // current resource default
-    'depth' => 1,
+    'depth' => 10,
     'requestVar' => 'tag',
     'target' => null,
     'tv' => null,
@@ -68,10 +68,6 @@ if ($c->prepare() and $c->stmt->execute()) {
             $tag['requestVar'] = $config['requestVar'];
             $tpl = $tag['tag'] == $requestTag ? $config['tplActive'] : $config['tpl'];
             $output[] = $parser->getChunk($tpl, $tag);
-        }
-        if (!empty($config['showAll'])) {
-            $tpl = empty($requestTag) ? $config['tplAllActive'] : $config['tplAll'];
-            array_unshift($output, $parser->getChunk($tpl, array('uri' => $uri)));
         }
         $output = implode('', $output);
         if (!empty($config['tplWrapper'])) {
