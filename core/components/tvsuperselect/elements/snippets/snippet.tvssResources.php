@@ -1,9 +1,7 @@
 <?php
 /* @var modX $modx */
 /* @var pdoFetch $pdoFetch */
-
 $sp = &$scriptProperties;
-
 $fqn = $modx->getOption('pdoFetch.class', null, 'pdotools.pdofetch', true);
 $path = $modx->getOption('pdotools_class_path', null, MODX_CORE_PATH . 'components/pdotools/model/', true);
 if ($pdoClass = $modx->loadClass($fqn, $path, false, true)) {
@@ -13,7 +11,8 @@ if ($pdoClass = $modx->loadClass($fqn, $path, false, true)) {
     return false;
 }
 
-$sp['context'] = $context ?: $modx->context->key;
+//
+$sp['context'] = !empty($sp['context']) ? $sp['context'] : $modx->context->key;
 if (!$tags = (((($sp['tag'] ?: $sp['tags']) ?: $_REQUEST['tag']) ?: $_REQUEST['tags']) ?: '')) {
     return false;
 }
@@ -44,7 +43,7 @@ $tvs = explode(',', $tvs);
 $like = isset($sp['like']) ? $sp['like'] : false;
 
 // Подготавливаем параметры для выборки ресурсов с нужными тегами
-$class = $sp['class'] ?: 'modResource';
+$class = !empty($sp['class']) ? $sp['class'] : 'modResource';
 $loadModels = array('tvsuperselect' => MODX_CORE_PATH . 'components/tvsuperselect/model/');
 $select = array($class => '*');
 $leftJoin = array();

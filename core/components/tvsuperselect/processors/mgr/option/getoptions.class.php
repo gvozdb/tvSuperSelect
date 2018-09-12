@@ -1,52 +1,64 @@
 <?php
 
-class tvssOptionGetOptionsProcessor extends modObjectProcessor
+class tvssComboGetOptionsProcessor extends modObjectProcessor
 {
     public $classKey = 'tvssOption';
+    /** @var tvSuperSelect $tvss */
+    protected $tvss;
 
-    /** {@inheritDoc} */
+    /**
+     * @return bool
+     */
+    public function initialize()
+    {
+        $this->tvss = $this->modx->getService('tvsuperselect', 'tvSuperSelect',
+            $this->modx->getOption('tvsuperselect_core_path', null, MODX_CORE_PATH . 'components/tvsuperselect/') . 'model/tvsuperselect/');
+
+        return parent::initialize();
+    }
+
+    /**
+     * @return string
+     */
     public function process()
     {
         $query = trim($this->getProperty('query'));
-        $limit = trim($this->getProperty('limit', 10));
-        $tv_id = $this->getProperty('tv_id');
-        // $this->modx->log(modX::LOG_LEVEL_ERROR, print_r($tv_id, 1));
-
-        $c = $this->modx->newQuery($this->classKey);
-        $c->sortby('value', 'ASC');
-        $c->select('value');
-        $c->groupby('value');
-        $c->where(array(
-            'tv_id' => $tv_id,
-        ));
-        $c->limit($limit);
-
-        if (!empty($query)) {
-            $c->where(array('value:LIKE' => "%{$query}%"));
+        $limit = (int)$this->getProperty('limit', 10);
+        $resource_id = (int)$this->getProperty('resource_id', 0);
+        if (!$tv_id = (int)$this->getProperty('tv_id', 0)) {
+            //
         }
 
+        $q = $this->modx->newQuery($this->classKey);
+        $q->select('value');
+        $q->where(array(
+            'tv_id' => $tv_id,
+        ));
+        if (!empty($query)) {
+            $q->where(array('value:LIKE' => "%{$query}%"));
+        }
+        $q->limit($limit);
+        $q->sortby('value', 'ASC');
+        $q->groupby('value');
+
         $found = false;
-        if ($c->prepare() && $c->stmt->execute()) {
-            $res = $c->stmt->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($res as $v) {
+        if ($q->prepare() && $q->stmt->execute()) {
+            $rows = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $v) {
                 if ($v['value'] == $query) {
                     $found = true;
                 }
             }
         } else {
-            $res = array();
+            $rows = array();
         }
 
-        if (!$found && !empty($query)) {
-            $res = array_merge_recursive(array(array('value' => $query)), $res);
+        if ($found === false && !empty($query)) {
+            $rows = array_merge_recursive(array(array('value' => $query)), $rows);
         }
 
-        $return = $this->outputArray($res);
-
-        // $this->modx->log(modX::LOG_LEVEL_ERROR, print_r($return, 1));
-
-        return $return;
+        return $this->outputArray($rows);
     }
 }
 
-return 'tvssOptionGetOptionsProcessor';
+return 'tvssComboGetOptionsProcessor';

@@ -37,21 +37,35 @@
             , forId: 'inopt_allowBlank{/literal}{$tv}{literal}'
             , html: _('required_desc')
             , cls: 'desc-under'
+        }, {
+            xtype: 'textfield'
+            , fieldLabel: '{/literal}{$tvsslex.tv_connectorUrl}{literal}'
+            , description: MODx.expandHelp ? '' : '{/literal}{$tvsslex.tv_connectorUrl_desc}{literal}'
+            , name: 'inopt_connectorUrl'
+            , id: 'inopt_connectorUrl{/literal}{$tv}{literal}'
+            , value: params['connectorUrl'] || ''
+            , width: '99%'
+            , listeners: oc
+        }, {
+            xtype: MODx.expandHelp ? 'label' : 'hidden'
+            , forId: 'inopt_connectorUrl{/literal}{$tv}{literal}'
+            , html: '{/literal}{$tvsslex.tv_connectorUrl_desc}{literal}'
+            , cls: 'desc-under'
+        }, {
+            xtype: 'textfield'
+            , fieldLabel: '{/literal}{$tvsslex.tv_processorAction}{literal}'
+            , description: MODx.expandHelp ? '' : '{/literal}{$tvsslex.tv_processorAction_desc}{literal}'
+            , name: 'inopt_processorAction'
+            , id: 'inopt_processorAction{/literal}{$tv}{literal}'
+            , value: params['processorAction'] || ''
+            , width: '99%'
+            , listeners: oc
+        }, {
+            xtype: MODx.expandHelp ? 'label' : 'hidden'
+            , forId: 'inopt_processorAction{/literal}{$tv}{literal}'
+            , html: '{/literal}{$tvsslex.tv_processorAction_desc}{literal}'
+            , cls: 'desc-under'
         }, /*{
-         xtype: 'textfield'
-         ,fieldLabel: '{/literal}{$tvsslex.admin_coords}{literal}'
-         ,description: MODx.expandHelp ? '' : '{/literal}{$tvsslex.admin_coords_desc}{literal}'
-         ,name: 'inopt_adminCoords'
-         ,id: 'inopt_adminCoords{/literal}{$tv}{literal}'
-         ,value: params['adminCoords'] || ''
-         ,width: '99%'
-         ,listeners: oc
-         },{
-         xtype: MODx.expandHelp ? 'label' : 'hidden'
-         ,forId: 'inopt_adminCoords{/literal}{$tv}{literal}'
-         ,html: '{/literal}{$tvsslex.admin_coords_desc}{literal}'
-         ,cls: 'desc-under'
-         },{
          xtype: 'textfield'
          ,fieldLabel: '{/literal}{$tvsslex.admin_zoom}{literal}'
          ,description: MODx.expandHelp ? '' : '{/literal}{$tvsslex.admin_zoom_desc}{literal}'

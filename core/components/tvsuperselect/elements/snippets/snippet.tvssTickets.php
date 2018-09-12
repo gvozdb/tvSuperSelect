@@ -1,9 +1,9 @@
 <?php
 /* @var modX $modx */
-
 $sp = &$scriptProperties;
 
-$sp['context'] = $context ?: $modx->context->key;
+//
+$sp['context'] = !empty($sp['context']) ? $sp['context'] : $modx->context->key;
 if (!$tags = (((($sp['tag'] ?: $sp['tags']) ?: $_REQUEST['tag']) ?: $_REQUEST['tags']) ?: '')) {
     return false;
 }
@@ -35,7 +35,7 @@ $tvs = explode(',', $tvs);
 $like = isset($sp['like']) ? $sp['like'] : false;
 
 // Подготавливаем параметры для выборки ресурсов с нужными тегами
-$class = $sp['class'] ?: 'Ticket';
+$class = !empty($sp['class']) ? $sp['class'] : 'Ticket';
 $loadModels = array('tvsuperselect' => MODX_CORE_PATH . 'components/tvsuperselect/model/');
 $select = array();
 $leftJoin = array();
