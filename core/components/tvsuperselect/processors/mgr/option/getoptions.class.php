@@ -42,6 +42,7 @@ class tvssComboGetOptionsProcessor extends modObjectProcessor
         $q->sortby('value', 'ASC');
         $q->groupby('value');
 
+        //
         $found = false;
         if ($q->prepare() && $q->stmt->execute()) {
             $rows = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -54,9 +55,20 @@ class tvssComboGetOptionsProcessor extends modObjectProcessor
             $rows = array();
         }
 
+        //
         if ($found === false && !empty($query)) {
             $rows = array_merge_recursive(array(array('value' => $query)), $rows);
         }
+
+        //
+        foreach ($rows as &$row) {
+            if (empty($row['display'])) {
+                $row['display'] = $row['value'];
+            }
+        }
+        unset($row);
+
+        // $this->modx->log(1, print_r($rows, 1));
 
         return $this->outputArray($rows);
     }

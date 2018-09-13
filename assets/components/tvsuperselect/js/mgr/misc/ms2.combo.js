@@ -18,7 +18,7 @@ tvSuperSelect.combo.Options = function (config) {
                 autoLoad: true,
                 autoSave: false,
                 totalProperty: 'total',
-                fields: ['value'],
+                fields: ['value', 'display'],
                 url: config['connector_url'] || tvSuperSelect.config['connector_url'],
                 baseParams: {
                     action: config['processor_action'] || 'mgr/option/getoptions',
@@ -28,12 +28,22 @@ tvSuperSelect.combo.Options = function (config) {
                 },
             }),
             mode: 'remote',
-            displayField: 'value',
+            displayField: 'display',
             valueField: 'value',
             triggerAction: 'all',
             extraItemCls: 'x-tag',
             expandBtnCls: 'x-form-trigger',
             clearBtnCls: 'x-form-trigger',
+            displayFieldTpl: new Ext.XTemplate('{value}', {compiled: true}),
+            tpl: new Ext.XTemplate('\
+                    <tpl for="."><div class="x-combo-list-item tvss-combo__list-item">\
+                        <span class="tvss-combo__row" data-tvss-value="{value}">\
+                            {display}\
+                        </span>\
+                    </div></tpl>\
+                ',
+                {compiled: true}
+            ),
             listeners: {
                 newitem: function (bs, v, f) {
                     bs.addItem({tag: v});
