@@ -24,6 +24,7 @@ class tvssComboGetOptionsProcessor extends modObjectProcessor
     {
         $query = trim($this->getProperty('query'));
         $limit = (int)$this->getProperty('limit', 10);
+        $context_key = (int)$this->getProperty('context_key', 'web');
         $resource_id = (int)$this->getProperty('resource_id', 0);
         if (!$tv_id = (int)$this->getProperty('tv_id', 0)) {
             //

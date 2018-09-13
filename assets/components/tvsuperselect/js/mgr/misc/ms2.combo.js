@@ -22,7 +22,8 @@ tvSuperSelect.combo.Options = function (config) {
                 url: config['connector_url'] || tvSuperSelect.config['connector_url'],
                 baseParams: {
                     action: config['processor_action'] || 'mgr/option/getoptions',
-                    resource_id: config['resource_id'],
+                    context_key: config['context_key'] || 'web',
+                    resource_id: config['resource_id'] || 0,
                     tv_id: config['tv_id'],
                 },
             }),

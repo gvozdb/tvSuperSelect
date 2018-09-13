@@ -20,6 +20,7 @@
             xtype: 'tvss-minishop2-combo-options',
             renderTo: 'tv-tvss-{$tv->id}',
             name: 'tvss-option-{$tv->id}',
+            context_key: '{$ctx}',
             resource_id: '{$resource_id}',
             tv_id: '{$tv->id}',
             defaultItems: defaultItems,
