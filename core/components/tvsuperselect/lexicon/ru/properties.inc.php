@@ -9,8 +9,8 @@ $_lang['tvsuperselect_prop_tags'] = 'Алиас параметра "tag".';
 $_lang['tvsuperselect_prop_tv'] = 'ID дополнительного поля, по которому производим поиск. Для сниппета tvssResources можно указать несколько ID, через запятую.';
 $_lang['tvsuperselect_prop_tvs'] = 'Алиас параметра "tv".';
 
-$_lang['mskuponator_prop_tpl'] = 'Чанк вывода.';
-$_lang['mskuponator_prop_tplWrapper'] = 'Обёртка для чанка вывода.';
+$_lang['tvsuperselect_prop_tpl'] = 'Чанк вывода.';
+$_lang['tvsuperselect_prop_tplWrapper'] = 'Обёртка для чанка вывода.';
 
 $_lang['tvsuperselect_prop_outputSeparator'] = 'Разделитель вывода.';
 $_lang['tvsuperselect_prop_toPlaceholder'] = 'Сохранить результат в плейсхолдер, вместо прямого вывода на странице.';
