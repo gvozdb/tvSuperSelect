@@ -78,10 +78,10 @@ tvSuperSelect.combo.Options = function (config) {
         },
     });
 
-    // // not MIGX
-    // if (!/_/.test(config['name'])) {
-    //     config['name'] += '[]';
-    // }
+    // not MIGX
+    if (!/_/.test(config['name'])) {
+        config['name'] += '[]';
+    }
 
     tvSuperSelect.combo.Options.superclass.constructor.call(this, config);
 };
