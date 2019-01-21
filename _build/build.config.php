@@ -4,8 +4,8 @@
 define('PKG_NAME', 'tvSuperSelect');
 define('PKG_NAME_LOWER', strtolower(PKG_NAME));
 
-define('PKG_VERSION', '1.3.0');
-define('PKG_RELEASE', 'beta2');
+define('PKG_VERSION', '1.3.1');
+define('PKG_RELEASE', 'beta');
 define('PKG_AUTO_INSTALL', true);
 define('PKG_NAMESPACE_PATH', '{core_path}components/' . PKG_NAME_LOWER . '/');
 
